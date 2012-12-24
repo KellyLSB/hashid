@@ -157,6 +157,8 @@ if defined? ActiveRecord::Base
 				send(:include, Module.new {
 					send(:define_method, :id) do |*args|
 						_id = read_attribute(:id)
+						return _id if args.first == false
+						
 						return _id unless _id.respond_to?(:to_hashid)
 						_id.to_hashid(salt).parameterize
 					end
