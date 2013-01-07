@@ -153,14 +153,23 @@ if defined? ActiveRecord::Base
 		extend ActiveSupport::Concern
 
 		module ClassMethods
-			def hashid(salt)
+			def hashid(salt, type = :replacement)
 				send(:include, Module.new {
-					send(:define_method, :id) do |*args|
-						_id = read_attribute(:id)
-						return _id if args.first == false
-						
-						return _id unless _id.respond_to?(:to_hashid)
-						_id.to_hashid(salt).parameterize
+					if type == :replacement
+						send(:define_method, :id) do |*args|
+							_id = read_attribute(:id)
+							return _id if args.first == false
+							
+							return _id unless _id.respond_to?(:to_hashid)
+							_id.to_hashid(salt).parameterize
+						end
+					elsif type == :sideby
+						send(:define_method, :hashid) do
+							_id = read_attribute(:id)
+
+							return _id unless _id.respond_to?(:to_hashid)
+							_id.to_hashid(salt).parameterize
+						end
 					end
 				})
 
